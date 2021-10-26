@@ -18,6 +18,7 @@ type WrapOptions struct {
 	// defaults to \n if not set.
 	Linebreak []byte
 
+	// Maximum characters in a line, will default to 76 if set to zero.
 	Limit int
 
 	// Prefix is a prefix set on each line if
@@ -42,6 +43,15 @@ func (o *WrapOptions) flush(w io.Writer) int {
 
 const nbsp = '\xa0'
 
+// DefaultWrapOptions returns a WrapOptions object with the default
+// values set.
+func DefaultWrapOptions() *WrapOptions {
+	return &WrapOptions{
+		Linebreak: LF,
+		Limit:     76,
+	}
+}
+
 // WrapString wraps the given string within lim width in characters.
 //
 // Wrapping is currently naive and only happens at white-space. A future
@@ -50,6 +60,13 @@ const nbsp = '\xa0'
 // long word. pfx can be set to define a prefix for each new line.
 func WrapString(s string, opts *WrapOptions) string {
 	buf := &bytes.Buffer{}
+
+	if opts == nil {
+		opts = DefaultWrapOptions()
+	}
+	if opts.Limit == 0 {
+		opts.Limit = 76
+	}
 
 	var current int
 	var wordBuf, spaceBuf bytes.Buffer
